@@ -238,22 +238,20 @@ class AddLoginFragment : Fragment(R.layout.fragment_add_login) {
 
     private fun updateUsernameField() {
         val currentValue = binding.usernameText.text.toString()
+        val duplicateLoginUsername = duplicateLogin?.username
         val layout = binding.inputLayoutUsername
         val clearButton = binding.clearUsernameTextButton
         when {
-            currentValue.isEmpty() && usernameChanged -> {
-                // Invalid username because it's empty (although this is not true when editing logins)
-                validUsername = false
-                layout.error = context?.getString(R.string.saved_login_username_required)
-                layout.setErrorIconDrawable(R.drawable.mozac_ic_warning_with_bottom_padding)
-                layout.setErrorIconTintList(
-                    ColorStateList.valueOf(
-                        ContextCompat.getColor(requireContext(), R.color.fx_mobile_text_color_warning)
-                    )
-                )
+            duplicateLoginUsername != currentValue -> {
+                // Valid login, because there is no dupe
+                validUsername = true
+                layout.error = null
+                layout.errorIconDrawable = null
+                clearButton.isVisible = true
             }
-            duplicateLogin != null -> {
-                // Invalid username because it's a dupe of another login
+            else -> {
+                // Invalid login because it's a dupe of another one
+                usernameChanged = true
                 validUsername = false
                 layout.error = context?.getString(R.string.saved_login_duplicate)
                 layout.setErrorIconDrawable(R.drawable.mozac_ic_warning_with_bottom_padding)
@@ -262,12 +260,7 @@ class AddLoginFragment : Fragment(R.layout.fragment_add_login) {
                         ContextCompat.getColor(requireContext(), R.color.fx_mobile_text_color_warning)
                     )
                 )
-            }
-            else -> {
-                // Valid username
-                validUsername = true
-                layout.error = null
-                layout.errorIconDrawable = null
+                clearButton.isVisible = false
             }
         }
         clearButton.isVisible = validUsername
